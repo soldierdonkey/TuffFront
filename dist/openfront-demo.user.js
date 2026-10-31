@@ -2099,6 +2099,16 @@
     }
   }
 
+  // Escape cancels the confirmation at once (box gone, nothing armed). The key
+  // still reaches the game.
+  function onRiskKeyDown(e) {
+    if (e.key !== 'Escape' || !riskPending) return;
+    riskPending = null;
+    clearTimeout(riskHideTimer);
+    hideRiskNotice();
+  }
+
+  window.addEventListener('keydown', onRiskKeyDown, true);
   window.addEventListener('pointerdown', onRiskPointerDown, true);
   window.addEventListener('pointerup', onRiskPointerUp, true);
 
