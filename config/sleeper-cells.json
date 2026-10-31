@@ -1,0 +1,11 @@
+{
+  "maxTiles": 5,
+  "minDistance": 5,
+  "maxDrawn": 400,
+  "enemyColor": "#ff1f1f",
+  "ownColor": "#22ff66",
+  "teamColor": "#ff8c1a",
+  "glowPx": 16,
+  "minMarkPx": 7,
+  "_comment": "Only scans while Space is held. A sleeper cell is a connected patch of one player's land with fewer than maxTiles tiles at least minDistance tiles (square distance) from that player's biggest patch (mainland) and touch the ocean (inland specks, e.g. nuke craters, are ignored). enemyColor = other players' cells (anywhere on the map), ownColor = yours. Change the size with config.sleeperMaxTiles, the distance with config.sleeperMinDistance, switch off with config.sleeperCells = false."
+}

@@ -1,0 +1,10 @@
+{
+  "name": "openfront-userscripts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "install-script": "node install.js",
+    "install-all": "node install.js --all"
+  }
+}

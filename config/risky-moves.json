@@ -1,0 +1,15 @@
+{
+  "confirmSeconds": 4,
+  "dragPx": 10,
+  "refreshMs": 1000,
+  "button": { "width": 110, "height": 34, "offset": 18 },
+  "peakSeconds": 30,
+  "bigRatio": 2,
+  "largerRatio": 1.5,
+  "minLeftPercent": {
+    "big": 40,
+    "larger": 30,
+    "similar": 25,
+    "none": 20
+  }
+}

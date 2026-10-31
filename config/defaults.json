@@ -1,0 +1,11 @@
+{
+  "toggleKey": "-",
+  "enabled": true,
+  "warnings": {},
+  "popupSeconds": 4,
+  "riskyMoves": true,
+  "spawnBeep": true,
+  "sleeperCells": true,
+  "sleeperMaxTiles": 5,
+  "sleeperMinDistance": 5
+}

@@ -1,0 +1,29 @@
+#of-demo-userscript-indicator {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background: #2b1745;
+  color: #f4a24c;
+  font: 600 14px/1 inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+#of-demo-userscript-indicator:hover { background: #3a1f5c; }
+#of-demo-userscript-indicator.disabled { color: #9a9a9a; background: #2a2a2a; }
+#of-demo-userscript-indicator.disabled .dot { background: #888; box-shadow: none; }
+#of-demo-userscript-indicator .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+}

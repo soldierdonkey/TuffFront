@@ -1,0 +1,9 @@
+{
+  "name": "OpenFront Demo Script",
+  "namespace": "https://openfront.io/",
+  "version": "0.9.0",
+  "description": "Demo userscript that logs to the console and shows a \"script loaded\" button (\"game detected\" while in a game) on openfront.io, and plans bot-phase attacks to maximise annexations: chips under each tribe's troop count (ANNEX / LEAVE / #order / BOAT IN / cost tiers), the best target outlined in green and small ocean entrances in magenta; press - to disable/enable (key configurable via right-click)",
+  "match": ["https://openfront.io/*", "https://*.openfront.io/*"],
+  "runAt": "document-end",
+  "grant": "none"
+}

@@ -1,0 +1,15 @@
+#of-demo-risk {
+  position: fixed; left: 0; right: 0; margin: 0 auto; width: fit-content; bottom: 22%;
+  z-index: 800; pointer-events: none; max-width: 90vw;
+  padding: 10px 16px; border-radius: 8px; border-left: 4px solid #dc2626;
+  background: rgba(30, 10, 10, 0.88); color: #fff; backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  font: 600 14px/1.35 inherit; text-align: center;
+}
+#of-demo-risk .detail { display: block; opacity: 0.8; font-weight: 500; }
+#of-demo-risk-btn {
+  position: fixed; z-index: 801; pointer-events: none; display: flex; align-items: center; justify-content: center;
+  box-sizing: border-box; border-radius: 6px; background: #dc2626; color: #fff;
+  border: 2px solid #fff; letter-spacing: 0.08em; font: 700 13px/1 inherit;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}

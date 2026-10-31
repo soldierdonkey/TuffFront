@@ -1,0 +1,41 @@
+{
+  "refreshMs": 70,
+  "ring2CacheMs": 3000,
+  "troopMargin": 2,
+  "maxClicks": 8,
+  "weakClicks": 3,
+  "busyClicks": 5,
+  "maxEntrance": 6,
+  "keepBonus": 1.1,
+  "exactLimit": 16,
+  "budgetPercent": 90,
+  "tiers": {
+    "weak": { "tag": "WEAK", "color": "#16a34a" },
+    "busy": { "tag": "BUSY", "color": "#16a34a" },
+    "costly": { "tag": "COSTLY", "color": "#d97706" },
+    "skip": { "tag": "SKIP", "color": "#6b7280" }
+  },
+  "roleColors": {
+    "walled": "#0ea5e9",
+    "leave": "#2563eb",
+    "later": "#64748b",
+    "boat": "#c026d3",
+    "target": "#16a34a"
+  },
+  "entranceColor": "#e040fb",
+  "targetOutlineColor": "#22ff55",
+  "borders": {
+    "allyColor": "#ffd60a",
+    "threatColor": "255,40,40",
+    "minAlpha": 0.25,
+    "weights": { "troops": 0.4, "tiles": 0.25, "gold": 0.2, "silos": 0.15 }
+  },
+  "nameplate": {
+    "fontBase": 36,
+    "fontSize": 48,
+    "scaleFactor": 0.4,
+    "scaleCap": 3,
+    "troopSize": 0.6,
+    "cullThreshold": 0.008
+  }
+}

@@ -1,0 +1,27 @@
+actionable-events {
+  position: fixed !important; left: 50%; top: var(--of-popup-top, 15%);
+  transform: translateX(-50%); width: var(--of-panel-width) !important; z-index: 800;
+}
+actionable-events > div { width: 100% !important; margin-top: 0 !important; }
+actionable-events > div > div {
+  background: rgba(17, 24, 39, 0.55) !important;
+  backdrop-filter: blur(4px); cursor: pointer;
+}
+actionable-events > div > div > button:first-child {
+  display: block; width: 100%; overflow: hidden; white-space: nowrap; text-align: left;
+}
+actionable-events .of-dismissed { display: none !important; }
+events-display {
+  position: fixed !important; left: 50%; top: var(--of-feed-top, 15%);
+  transform: translateX(-50%); width: var(--of-panel-width) !important; z-index: 800;
+}
+events-display > div { width: 100% !important; }
+events-display .events-container,
+events-display .important-events-container {
+  background: rgba(17, 24, 39, 0.55) !important;
+  backdrop-filter: blur(4px);
+}
+events-display table { table-layout: fixed; width: 100%; }
+events-display td { overflow: hidden; white-space: nowrap; }
+events-display td > button { display: block; width: 100%; text-align: left; white-space: nowrap; }
+events-display .of-dup-hidden { display: none !important; }

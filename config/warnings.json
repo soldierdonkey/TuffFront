@@ -1,0 +1,204 @@
+{
+  "refreshMs": 50,
+  "maxShown": 4,
+  "gap": 8,
+  "severity": {
+    "critical": {
+      "rank": 0,
+      "bg": "rgba(153, 27, 27, 0.62)",
+      "edge": "rgba(248, 113, 113, 0.9)"
+    },
+    "warning": {
+      "rank": 1,
+      "bg": "rgba(146, 64, 14, 0.58)",
+      "edge": "rgba(251, 191, 36, 0.9)"
+    },
+    "info": {
+      "rank": 2,
+      "bg": "rgba(30, 58, 95, 0.58)",
+      "edge": "rgba(96, 165, 250, 0.9)"
+    }
+  },
+  "custom": [
+    {
+      "id": "nukes",
+      "label": "Incoming nukes",
+      "severity": {
+        "mirv": "critical",
+        "warheads": "critical",
+        "bomb": "warning"
+      },
+      "where": "warning panel",
+      "notes": "Only nukes aimed at your land. Turn off with config.warnings = { nukes: false }."
+    },
+    {
+      "id": "landings",
+      "label": "Boats landing on you",
+      "severity": {
+        "enemy": "warning",
+        "allied": "info"
+      },
+      "where": "warning panel",
+      "notes": "Allied boats are the port-sniping case. Turn off with config.warnings = { landings: false }."
+    },
+    {
+      "id": "mirvAccess",
+      "label": "New MIRV access",
+      "severity": {
+        "new": "critical"
+      },
+      "where": "warning panel",
+      "notes": "A player other than you has a finished missile silo and enough gold for a MIRV. Shown once per player for milestoneSeconds. Turn off with config.warnings = { mirvAccess: false }."
+    },
+    {
+      "id": "hydrogenFirst",
+      "label": "First hydrogen bomb",
+      "severity": {
+        "first": "warning"
+      },
+      "where": "warning panel",
+      "notes": "The first player in the game (not you) with a finished silo and gold for a hydrogen bomb. Shown once, for milestoneSeconds. Turn off with config.warnings = { hydrogenFirst: false }."
+    }
+  ],
+  "native": [
+    {
+      "id": "MIRV_INBOUND",
+      "label": "MIRV inbound",
+      "tier": "major",
+      "pattern": "MIRV INBOUND",
+      "replacedBy": "nukes"
+    },
+    {
+      "id": "NUKE_INBOUND",
+      "label": "Atom bomb inbound",
+      "tier": "minor",
+      "pattern": "- atom bomb inbound\\s*$",
+      "replacedBy": "nukes"
+    },
+    {
+      "id": "HYDROGEN_BOMB_INBOUND",
+      "label": "Hydrogen bomb inbound",
+      "tier": "major",
+      "pattern": "- hydrogen bomb inbound\\s*$",
+      "replacedBy": "nukes"
+    },
+    {
+      "id": "NUKE_DETONATED",
+      "label": "Nuke detonated",
+      "tier": "minor"
+    },
+    {
+      "id": "NAVAL_INVASION_INBOUND",
+      "label": "Naval invasion incoming",
+      "tier": "minor",
+      "pattern": "^Naval invasion incoming",
+      "replacedBy": null,
+      "notes": "Duplicates the landings warning. Set replacedBy to \"landings\" to hide the game's row while that system is on."
+    },
+    {
+      "id": "ATTACK_REQUEST",
+      "label": "Attack request",
+      "tier": "major"
+    },
+    {
+      "id": "ALLIANCE_ACCEPTED",
+      "label": "Alliance accepted",
+      "tier": "minor"
+    },
+    {
+      "id": "ALLIANCE_REJECTED",
+      "label": "Alliance rejected",
+      "tier": "minor"
+    },
+    {
+      "id": "ALLIANCE_BROKEN",
+      "label": "Alliance broken",
+      "tier": "critical"
+    },
+    {
+      "id": "RENEW_ALLIANCE",
+      "label": "Alliance about to expire (popup)",
+      "tier": "major"
+    },
+    {
+      "id": "CONQUERED_PLAYER",
+      "label": "Player conquered",
+      "tier": "minor"
+    },
+    {
+      "id": "CHAT",
+      "label": "Chat message",
+      "tier": "major"
+    },
+    {
+      "id": "DONATION_RECEIVED",
+      "label": "Donation received",
+      "tier": "major"
+    },
+    {
+      "id": "ALLIANCE_REQUEST",
+      "label": "Alliance request (popup)",
+      "tier": "popup",
+      "notes": "Click hides it, see config popupSeconds."
+    },
+    {
+      "id": "ATTACK_FAILED",
+      "label": "Attack failed",
+      "tier": "minor"
+    },
+    {
+      "id": "ATTACK_CANCELLED",
+      "label": "Attack cancelled",
+      "tier": "minor"
+    },
+    {
+      "id": "SAM_MISS",
+      "label": "SAM missed",
+      "tier": "minor"
+    },
+    {
+      "id": "SAM_HIT",
+      "label": "SAM hit",
+      "tier": "minor"
+    },
+    {
+      "id": "CAPTURED_ENEMY_UNIT",
+      "label": "Captured enemy unit",
+      "tier": "minor"
+    },
+    {
+      "id": "UNIT_DESTROYED",
+      "label": "Unit destroyed",
+      "tier": "minor"
+    },
+    {
+      "id": "ALLIANCE_EXPIRED",
+      "label": "Alliance expired",
+      "tier": "minor"
+    },
+    {
+      "id": "DONATION_SENT",
+      "label": "Donation sent",
+      "tier": "minor"
+    }
+  ],
+  "_comment": "custom: our warning systems (keys of config.warnings). Each severity entry picks a level from the top-level severity object (critical, warning, info) for one case of that system. native: the game's own messages. tier is where the game files them: major rows (bordered in red) keep the game's own click, which jumps to the player or unit; minor rows are hidden when clicked. pattern + replacedBy are used: a native row whose text matches pattern is hidden while the custom system named replacedBy is on. milestoneSeconds: how long mirvAccess / hydrogenFirst stay in the panel. costs: gold needed for access (a MIRV costs mirvStep more per MIRV launched). eta: arrival time estimates shown instead of tile distances. Nukes fly an arc (arc length ~ nukeArcFactor x straight distance) at nukeSpeed per tick; boats move boatTilesPerTick along a water route (~ boatRouteFactor x straight distance). Estimates, shown with a ~.",
+  "milestoneSeconds": 20,
+  "costs": {
+    "hydrogen": 5000000,
+    "mirvBase": 25000000,
+    "mirvStep": 15000000
+  },
+  "eta": {
+    "ticksPerSecond": 10,
+    "nukeSpeed": {
+      "Atom Bomb": 10,
+      "Hydrogen Bomb": 10,
+      "MIRV": 15,
+      "MIRV Warhead": 22
+    },
+    "nukeArcFactor": 1.25,
+    "boatTilesPerTick": 1,
+    "boatRouteFactor": 1.2
+  }
+}
