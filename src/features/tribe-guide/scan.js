@@ -9,8 +9,10 @@ async function scanBot(game, me, bot, early) {
   const botID = bot.smallID();
   const myID = me.smallID();
   const { borderTiles } = await bot.borderTiles();
-  const info = { hardOpen: false, bordersUs: false, entranceTiles: [], N: new Set() };
+  const info = { hardOpen: false, bordersUs: false, entranceTiles: [], N: new Set(), mag: 100 };
+  let magSum = 0;
   for (const tile of borderTiles) {
+    magSum += terrainMag(game, tile);
     if (game.isOnEdgeOfMap(tile)) info.hardOpen = true;
     const shore = game.isOceanShore(tile);
     if (shore) info.entranceTiles.push(tile);
@@ -34,6 +36,7 @@ async function scanBot(game, me, bot, early) {
     });
     if (early && (info.hardOpen || info.entranceTiles.length > MAX_ENTRANCE)) break;
   }
+  if (borderTiles.length) info.mag = magSum / borderTiles.length;
   return info;
 }
 
@@ -74,10 +77,13 @@ async function scanTribes(game, me, ratio) {
 
   const attacked = new Set(me.outgoingAttacks().map((a) => a.targetID));
   const myTroops = me.troops();
+  const push = pushByTarget(me);
   const nodes = [];
   for (const [id, info] of infos) {
     const p = game.playerBySmallID(id);
-    const clicks = clicksNeeded(myTroops, ratio, p.troops());
+    const tribe = { tiles: p.numTilesOwned(), troops: p.troops(), mag: info.mag };
+    const need = troopsStillNeeded(tribe, push.get(id) || 0);
+    const clicks = clicksNeeded(myTroops, ratio, need);
     const touchesUs = (tile) => {
       let yes = false;
       game.forEachNeighbor(tile, (n) => {
@@ -97,8 +103,9 @@ async function scanTribes(game, me, ratio) {
       entranceTiles: info.entranceTiles,
       entranceCount: info.entranceTiles.length,
       entranceByLand: info.entranceTiles.some(touchesUs),
+      mag: info.mag,
       clicks,
-      percent: (TROOP_MARGIN * p.troops() * 100) / Math.max(1, myTroops),
+      percent: (need * 100) / Math.max(1, myTroops),
     });
   }
   return { nodes, weOwnShore };

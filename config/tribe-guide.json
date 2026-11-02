@@ -1,7 +1,11 @@
 {
   "refreshMs": 70,
   "ring2CacheMs": 3000,
-  "troopMargin": 2,
+  "troopMargin": 1.15,
+  "costSteps": 24,
+  "botLossMult": 0.7,
+  "lossBase": 0.463,
+  "lossPerDensity": 0.0039,
   "maxClicks": 8,
   "weakClicks": 3,
   "busyClicks": 5,

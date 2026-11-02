@@ -136,6 +136,12 @@ function onRiskPointerUp(e) {
   const down = riskDown;
   riskDown = null;
   if (!down || e.button !== 0 || e.pointerType === 'touch' || !config.enabled || !config.riskyMoves) return;
+  if (down.cancelled) {
+    // Escape was pressed during this click: consume the release, attack nothing.
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    return;
+  }
   if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return; // modifier menus
   if (Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y) >= RISK_DRAG_PX) return; // a pan
   if (!threat || !isInGame()) return;
@@ -204,6 +210,7 @@ function onRiskPointerUp(e) {
 // still reaches the game.
 function onRiskKeyDown(e) {
   if (e.key !== 'Escape' || !riskPending) return;
+  if (riskDown) riskDown.cancelled = true; // button still held: its release must not restart the box
   riskPending = null;
   clearTimeout(riskHideTimer);
   hideRiskNotice();

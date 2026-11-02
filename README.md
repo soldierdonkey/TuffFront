@@ -103,7 +103,7 @@ This plans the early expansion to take as much land as possible. A tribe is anne
 
 - **★** and a **green outline** mark the best target. **Magenta** tiles on the map are entrances.
 - **Cost tiers:** `WEAK` takes up to 3 clicks. `BUSY` is a tribe fighting someone else, up to 5 clicks. `COSTLY` takes more than that, and `SKIP` would take more than 8. `COSTLY` and `SKIP` show a percentage of your troops instead of clicks.
-- **Clicks** assume you send twice the tribe's troops, and they update as you move the attack slider.
+- **Clicks** are the number needed to send enough troops to take the whole tribe. The estimate uses the tribe's troops and size and its terrain (mountains cost more than highland, highland more than plains or desert), and it counts troops you've already sent at that tribe. It updates as you move the attack slider. It's an estimate: defence posts and fallout aren't included.
 
 The planner hasn't been confirmed in real play for annexing walled-in tribes, annexing a pocket by landing on its entrance, or whether a boat can reach a given inlet. Treat those labels as advice.
 

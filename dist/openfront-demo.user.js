@@ -29,7 +29,11 @@
     "tribeGuide": {
       "refreshMs": 70,
       "ring2CacheMs": 3000,
-      "troopMargin": 2,
+      "troopMargin": 1.15,
+      "costSteps": 24,
+      "botLossMult": 0.7,
+      "lossBase": 0.463,
+      "lossPerDensity": 0.0039,
       "maxClicks": 8,
       "weakClicks": 3,
       "busyClicks": 5,
@@ -541,7 +545,11 @@
   const {
     refreshMs: TRIBE_REFRESH_MS,
     ring2CacheMs: RING2_CACHE_MS,
-    troopMargin: TROOP_MARGIN, // send this many times the tribe's current troops
+    troopMargin: TROOP_MARGIN, // safety factor on the simulated troops needed to take the tribe
+    costSteps: COST_STEPS, // steps used to simulate an attack through the tribe
+    botLossMult: BOT_LOSS_MULT, // engine: attacker loss multiplier against a tribe
+    lossBase: LOSS_BASE, // engine: ATTACKER_LOSS_BASE
+    lossPerDensity: LOSS_PER_DENSITY, // engine: ATTACKER_LOSS_PER_DENSITY
     maxClicks: MAX_CLICKS, // more clicks than this and the tribe is not worth it
     weakClicks: WEAK_CLICKS, // at most this many clicks counts as a weak tribe
     busyClicks: BUSY_CLICKS, // a tribe fighting someone else is weak up to this
@@ -563,10 +571,60 @@
   const CULL_THRESHOLD = JSON_CONFIG.tribeGuide.nameplate.cullThreshold; // in clip space, i.e. of half the canvas width
 
   // ---- src/features/tribe-guide/cost.js
-  // Clicks needed to send TROOP_MARGIN x the tribe's troops. Each click sends
-  // `ratio` of what we have left, so later clicks are smaller. null = too many.
-  function clicksNeeded(myTroops, ratio, tribeTroops) {
-    const need = TROOP_MARGIN * tribeTroops;
+  // Terrain magnitude -> the engine's per-tile "mag" (terrainAttackBase in
+  // EngineConfig.ts): plains 80, highland 100, mountain 120. Desert and the like
+  // are plains or highland by magnitude, so this covers them.
+  function terrainMag(game, tile) {
+    const m = game.magnitude(tile);
+    return m < 10 ? 80 : m < 20 ? 100 : 120;
+  }
+
+  // Troops lost per conquered tile with an attack stack `stack` against a tribe
+  // of `troops` over `tiles` (attackLogic in EngineConfig.ts, bot defender, no
+  // defence post or fallout). The large-territory bonuses are ~1 early on.
+  function tileLoss(mag, stack, troops, tiles) {
+    const ratio = Math.min(2, Math.max(0.6, troops / Math.max(1, stack)));
+    return BOT_LOSS_MULT * mag * ratio * (LOSS_BASE + LOSS_PER_DENSITY * (troops / Math.max(1, tiles)));
+  }
+
+  // Smallest attack stack that conquers every tile of the tribe: the stack
+  // shrinks as it takes tiles and the tribe loses its troop density with each
+  // one, so walk through the tribe in steps and binary-search the start.
+  function troopsToTake(tribe) {
+    const { tiles, troops, mag } = tribe;
+    if (tiles <= 0) return 0;
+    const density = troops / tiles;
+    const chunk = tiles / COST_STEPS;
+    const survives = (start) => {
+      let stack = start;
+      let left = troops;
+      for (let i = 0; i < COST_STEPS; i++) {
+        stack -= chunk * tileLoss(mag, stack, left, tiles);
+        left -= chunk * density;
+        if (stack <= 0) return false;
+      }
+      return true;
+    };
+    let lo = 0;
+    let hi = Math.max(1, troops) * 64;
+    if (!survives(hi)) return hi;
+    for (let i = 0; i < 24; i++) {
+      const mid = (lo + hi) / 2;
+      if (survives(mid)) hi = mid;
+      else lo = mid;
+    }
+    return hi * TROOP_MARGIN;
+  }
+
+  // Troops still to send, after what our attacks on this tribe already carry.
+  function troopsStillNeeded(tribe, pushTroops) {
+    return Math.max(0, troopsToTake(tribe) - pushTroops);
+  }
+
+  // Clicks needed to send `need` troops. Each click sends `ratio` of what we
+  // have left, so later clicks are smaller. null = too many.
+  function clicksNeeded(myTroops, ratio, need) {
+    if (need <= 0) return 0;
     let pool = myTroops;
     let sent = 0;
     for (let n = 1; n <= MAX_CLICKS; n++) {
@@ -576,6 +634,16 @@
       if (sent >= need) return n;
     }
     return null;
+  }
+
+  // Troops our live attacks on each player already carry (not retreating ones).
+  function pushByTarget(me) {
+    const push = new Map();
+    for (const a of me.outgoingAttacks()) {
+      if (a.retreating) continue;
+      push.set(a.targetID, (push.get(a.targetID) || 0) + a.troops);
+    }
+    return push;
   }
 
   function tierOf(clicks, busy) {
@@ -597,8 +665,10 @@
     const botID = bot.smallID();
     const myID = me.smallID();
     const { borderTiles } = await bot.borderTiles();
-    const info = { hardOpen: false, bordersUs: false, entranceTiles: [], N: new Set() };
+    const info = { hardOpen: false, bordersUs: false, entranceTiles: [], N: new Set(), mag: 100 };
+    let magSum = 0;
     for (const tile of borderTiles) {
+      magSum += terrainMag(game, tile);
       if (game.isOnEdgeOfMap(tile)) info.hardOpen = true;
       const shore = game.isOceanShore(tile);
       if (shore) info.entranceTiles.push(tile);
@@ -622,6 +692,7 @@
       });
       if (early && (info.hardOpen || info.entranceTiles.length > MAX_ENTRANCE)) break;
     }
+    if (borderTiles.length) info.mag = magSum / borderTiles.length;
     return info;
   }
 
@@ -662,10 +733,13 @@
 
     const attacked = new Set(me.outgoingAttacks().map((a) => a.targetID));
     const myTroops = me.troops();
+    const push = pushByTarget(me);
     const nodes = [];
     for (const [id, info] of infos) {
       const p = game.playerBySmallID(id);
-      const clicks = clicksNeeded(myTroops, ratio, p.troops());
+      const tribe = { tiles: p.numTilesOwned(), troops: p.troops(), mag: info.mag };
+      const need = troopsStillNeeded(tribe, push.get(id) || 0);
+      const clicks = clicksNeeded(myTroops, ratio, need);
       const touchesUs = (tile) => {
         let yes = false;
         game.forEachNeighbor(tile, (n) => {
@@ -685,8 +759,9 @@
         entranceTiles: info.entranceTiles,
         entranceCount: info.entranceTiles.length,
         entranceByLand: info.entranceTiles.some(touchesUs),
+        mag: info.mag,
         clicks,
-        percent: (TROOP_MARGIN * p.troops() * 100) / Math.max(1, myTroops),
+        percent: (need * 100) / Math.max(1, myTroops),
       });
     }
     return { nodes, weOwnShore };
@@ -1117,11 +1192,16 @@
   function evaluateTribes(game, me, ratio) {
     const rows = [];
     if (!plan) return rows;
+    const push = pushByTarget(me);
     for (const [id, info] of plan.roles) {
       const p = game.playerBySmallID(id);
       if (!p.isPlayer() || !p.isAlive()) continue;
       const node = plan.nodes.get(id);
-      const clicks = clicksNeeded(me.troops(), ratio, p.troops());
+      const need = troopsStillNeeded(
+        { tiles: p.numTilesOwned(), troops: p.troops(), mag: node ? node.mag : 100 },
+        push.get(id) || 0
+      );
+      const clicks = clicksNeeded(me.troops(), ratio, need);
       rows.push({
         player: p,
         ...info,
@@ -1129,7 +1209,7 @@
         byLand: node ? node.entranceByLand : false,
         tier: tierOf(clicks, p.outgoingAttacks().length > 0),
         clicks: info.role === 'walled' ? 1 : clicks,
-        percent: (TROOP_MARGIN * p.troops() * 100) / Math.max(1, me.troops()),
+        percent: (need * 100) / Math.max(1, me.troops()),
         best: id === plan.bestId,
       });
     }
@@ -2035,6 +2115,12 @@
     const down = riskDown;
     riskDown = null;
     if (!down || e.button !== 0 || e.pointerType === 'touch' || !config.enabled || !config.riskyMoves) return;
+    if (down.cancelled) {
+      // Escape was pressed during this click: consume the release, attack nothing.
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return;
+    }
     if (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return; // modifier menus
     if (Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y) >= RISK_DRAG_PX) return; // a pan
     if (!threat || !isInGame()) return;
@@ -2103,6 +2189,7 @@
   // still reaches the game.
   function onRiskKeyDown(e) {
     if (e.key !== 'Escape' || !riskPending) return;
+    if (riskDown) riskDown.cancelled = true; // button still held: its release must not restart the box
     riskPending = null;
     clearTimeout(riskHideTimer);
     hideRiskNotice();

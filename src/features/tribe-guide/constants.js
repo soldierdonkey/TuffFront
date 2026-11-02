@@ -2,7 +2,11 @@
 const {
   refreshMs: TRIBE_REFRESH_MS,
   ring2CacheMs: RING2_CACHE_MS,
-  troopMargin: TROOP_MARGIN, // send this many times the tribe's current troops
+  troopMargin: TROOP_MARGIN, // safety factor on the simulated troops needed to take the tribe
+  costSteps: COST_STEPS, // steps used to simulate an attack through the tribe
+  botLossMult: BOT_LOSS_MULT, // engine: attacker loss multiplier against a tribe
+  lossBase: LOSS_BASE, // engine: ATTACKER_LOSS_BASE
+  lossPerDensity: LOSS_PER_DENSITY, // engine: ATTACKER_LOSS_PER_DENSITY
   maxClicks: MAX_CLICKS, // more clicks than this and the tribe is not worth it
   weakClicks: WEAK_CLICKS, // at most this many clicks counts as a weak tribe
   busyClicks: BUSY_CLICKS, // a tribe fighting someone else is weak up to this

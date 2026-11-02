@@ -56,11 +56,16 @@ function clearTribe() {
 function evaluateTribes(game, me, ratio) {
   const rows = [];
   if (!plan) return rows;
+  const push = pushByTarget(me);
   for (const [id, info] of plan.roles) {
     const p = game.playerBySmallID(id);
     if (!p.isPlayer() || !p.isAlive()) continue;
     const node = plan.nodes.get(id);
-    const clicks = clicksNeeded(me.troops(), ratio, p.troops());
+    const need = troopsStillNeeded(
+      { tiles: p.numTilesOwned(), troops: p.troops(), mag: node ? node.mag : 100 },
+      push.get(id) || 0
+    );
+    const clicks = clicksNeeded(me.troops(), ratio, need);
     rows.push({
       player: p,
       ...info,
@@ -68,7 +73,7 @@ function evaluateTribes(game, me, ratio) {
       byLand: node ? node.entranceByLand : false,
       tier: tierOf(clicks, p.outgoingAttacks().length > 0),
       clicks: info.role === 'walled' ? 1 : clicks,
-      percent: (TROOP_MARGIN * p.troops() * 100) / Math.max(1, me.troops()),
+      percent: (need * 100) / Math.max(1, me.troops()),
       best: id === plan.bestId,
     });
   }
